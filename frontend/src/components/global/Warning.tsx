@@ -1,6 +1,6 @@
 import { Dialog, Typography } from '@mui/material';
 import React, { FC } from 'react';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Warning: FC = () => {
   const [shown, setShown] = React.useState(false);

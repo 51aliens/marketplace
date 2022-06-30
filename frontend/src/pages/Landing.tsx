@@ -18,7 +18,7 @@ import {
   Paper,
   LinearProgress,
 } from '@mui/material';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 import toast from 'react-hot-toast';
 import {
   DataLog,

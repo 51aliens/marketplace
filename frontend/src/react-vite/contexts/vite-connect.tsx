@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 import QRCode from 'qrcode.react';
 // @ts-ignore
 import Connector from '@vite/connector';

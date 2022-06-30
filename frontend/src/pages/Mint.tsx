@@ -8,7 +8,7 @@ import React, {
 import clsx from 'clsx';
 import { makeStyles } from '@mui/styles';
 import { Button, TextField, Dialog, Tabs, Tab } from '@mui/material';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   DataLog,
   useViteProvider,

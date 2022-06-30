@@ -1,8 +1,8 @@
 import React, { FC, ReactNode, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
-import CopyIcon from '@material-ui/icons/FileCopy';
-import CopiedIcon from '@material-ui/icons/Check';
+import CopyIcon from '@mui/icons-material/FileCopy';
+import CopiedIcon from '@mui/icons-material/Check';
 import clsx from 'clsx';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
