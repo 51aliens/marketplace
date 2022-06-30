@@ -118,7 +118,14 @@ export const ViteConnectProvider: FC<{ children: ReactNode }> = ({
             />
 
             <Box pb={2}>Connect on app</Box>
-            <QRCode value={connectionUri} size={128 * 2} />
+            <Box
+              sx={{
+                padding: 2,
+                backgroundColor: '#fff',
+              }}
+            >
+              <QRCode value={connectionUri} size={128 * 2} />
+            </Box>
           </Box>
         </Dialog>
       )}
