@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import CopyIcon from '@material-ui/icons/FileCopy';
 import CopiedIcon from '@material-ui/icons/Check';
 import clsx from 'clsx';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import CopyToClipboard from 'react-copy-to-clipboard';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -39,6 +39,7 @@ const CopyToClipboardContainer: FC<{ text?: string; children: ReactNode }> = ({
     >
       <Box mr={1}>{children}</Box>
       {!text ? null : (
+        // @ts-ignore
         <CopyToClipboard {...{ text, onCopy }}>
           <Box component='span' className='flex items-center'>
             {copied === true ? (
