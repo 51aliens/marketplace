@@ -1,20 +1,9 @@
-<div align="center">
-  <a href="https://youtu.be/3vnsU9wNgaY">
-    <img src="https://vite-nft-marketplace.surge.sh/shot.png" alt="vite nft marketplace" width=700 />
-  </a>
-</div>
+<img src="https://51aliens.net/images/home.png">
 
-## Vite NFT Marketplace
+# 51 Aliens
+> The frontend and the contracts are a fork of [0xkarl's nft marketplace](https://github.com/0xkarl/vite-nft-marketplace).
 
-- Fully on-chain NFT Marketplace on Vite Blockchain
-- Support for multiple nft collection (wip)
-- NFT collections listed through curation by contract owner/DAO
+> If you don't know who we are, please read [51aliens.net](https://51aliens.net/)
 
-Video demo at https://youtu.be/3vnsU9wNgaY
-
-### Devnet
-
-Localnet uses local privat keys for faster development while testnet uses Vite Connect.
-### Testnet
-
-Dapp at https://vite-nft-marketplace.surge.sh
+# Marketplace
+The marketplace is live at https://app.51aliens.net!
