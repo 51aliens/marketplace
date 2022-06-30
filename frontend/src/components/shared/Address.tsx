@@ -16,7 +16,7 @@ const Address: FC<{ address: string; copy?: boolean }> = ({
   }, [address]);
 
   const blockExplorerLink = useMemo(
-    () => `${baseBlockexplorerUrl}/account/${address}`,
+    () => `${baseBlockexplorerUrl}/address/${address}`,
     [address, baseBlockexplorerUrl]
   );
 

@@ -1,12 +1,12 @@
 import React, { FC, ReactNode, useState, useMemo } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import Dialog from '@material-ui/core/Dialog';
+import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
 import CloseIcon from '@material-ui/icons/Close';
 import QRCode from 'qrcode.react';
+// @ts-ignore
 import Connector from '@vite/connector';
-import pick from 'lodash/pick';
 
 import { useViteProvider, ViteWalletContext } from './vite';
 import * as utils from '../utils';
@@ -44,7 +44,7 @@ export const ViteConnectProvider: FC<{ children: ReactNode }> = ({
   const [connectionUri, setConnectionUri] = useState<string | null>(null);
   const classes = useStyles();
   const vbInstance = useMemo(
-    () => new Connector({ bridge: 'wss://biforst.vite.net' }),
+    () => new Connector({ bridge: 'wss://viteconnect.thomiz.dev' }),
     []
   );
 
@@ -65,17 +65,6 @@ export const ViteConnectProvider: FC<{ children: ReactNode }> = ({
 
   const createAccountBlock = async (typ: string, params: any) => {
     const block = await utils.createAccountBlock(provider, typ, params);
-    const b = pick(block, [
-      'address',
-      'amount',
-      'blockType',
-      'data',
-      'fee',
-      'height',
-      'previousHash',
-      'tokenId',
-      '_toAddress',
-    ]);
 
     return await new Promise((resolve, reject) => {
       vbInstance.on('disconnect', () => {
@@ -87,19 +76,15 @@ export const ViteConnectProvider: FC<{ children: ReactNode }> = ({
           method: 'vite_signAndSendTx',
           params: [
             {
-              block: {
-                ...b,
-                toAddress: b._toAddress,
-              },
+              block: block.accountBlock,
             },
           ],
         })
         .then((r: any) => {
-          console.log(r);
           resolve(r);
         })
         .catch((e: any) => {
-          console.log(e);
+          console.error(e);
           reject(e);
         });
     });

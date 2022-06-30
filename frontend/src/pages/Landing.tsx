@@ -6,11 +6,20 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button, TextField, Dialog } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import {
+  Button,
+  Dialog,
+  Tabs,
+  Tab,
+  Typography,
+  Paper,
+  LinearProgress,
+} from '@mui/material';
 import CloseIcon from '@material-ui/icons/Close';
+import toast from 'react-hot-toast';
 import {
   DataLog,
   useViteProvider,
@@ -22,11 +31,10 @@ import {
 import uniq from 'lodash/uniq';
 
 import { useConfig } from '@contexts/config';
-import useIPFS, { getIPFSKeyUrl } from '@hooks/useIPFS';
+//import useIPFS, { getIPFSKeyUrl } from '@hooks/useIPFS';
 import BAYC_ABI from '@data/bayc-abi.json';
-import BAYC_TRAITS from '@data/bayc-traits.json';
 import MARKETPLACE_ABI from '@data/marketplace-abi.json';
-import { VITE_TOKEN_ID, ZERO_ADDRESS } from '@config';
+import { VITE_TOKEN_ID, ZERO_ADDRESS } from '../config';
 import { formatUnits, toBigNumber } from '@utils/big-number';
 import Address from '@components/shared/Address';
 import {
@@ -34,13 +42,14 @@ import {
   BidUpdatedEvent,
   TradedEvent,
   TransferEvent,
-} from '@types';
+} from '../types';
+import { setShouldConfetti } from './Mint';
+//import useGetRequest from '@hooks/useGetRequest';
 
 const useStyles = makeStyles((theme) => {
   return {
     container: {},
     tabs: {
-      borderBottom: '1px solid #eee',
       display: 'flex',
       '& > div': {
         padding: '0.5rem 1rem',
@@ -57,8 +66,6 @@ const useStyles = makeStyles((theme) => {
 
 const TABS = ['Items', 'Activity'];
 
-type Traits = Map<string, string[]>;
-
 type Log = { id: string; height: string; description: ReactNode };
 
 const Page: FC<{}> = () => {
@@ -68,10 +75,9 @@ const Page: FC<{}> = () => {
 
   const classes = useStyles();
   const [showMintModal, setShowMintModal] = useState(false);
-  const [mintTokenId, setMintTokenId] = useState('');
-  const [traits, setTraits] = useState<Traits>(new Map());
   const [activeTab, setActiveTab] = useState(TABS[0]);
   const [logs, setLogs] = useState<Log[]>([]);
+  const navigate = useNavigate();
 
   const offerUpdatedEventsFilter = useCallback(
     (log: DataLog<OfferUpdatedEvent>) => log.data.offeror !== ZERO_ADDRESS,
@@ -91,7 +97,7 @@ const Page: FC<{}> = () => {
   const offerUpdatedEvents: DataLog<OfferUpdatedEvent>[] = useVmLogs<OfferUpdatedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'OfferUpdated',
     offerUpdatedEventsFilter
   );
@@ -99,7 +105,7 @@ const Page: FC<{}> = () => {
   const bidUpdatedEvents: DataLog<BidUpdatedEvent>[] = useVmLogs<BidUpdatedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'BidUpdated',
     bidUpdatedEventsFilter
   );
@@ -107,7 +113,7 @@ const Page: FC<{}> = () => {
   const tradedEvents: DataLog<TradedEvent>[] = useVmLogs<TradedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'Traded',
     tradedEventsFilter
   );
@@ -124,7 +130,22 @@ const Page: FC<{}> = () => {
               Offer{' '}
               <div className={'mx-1 font-bold'}>
                 {formatUnits(log.data.minimumOffer, 18, 2)} VITE
-              </div>{' '}
+              </div>
+              for{' '}
+              <span className='flex items-center ml-1'>
+                <Typography
+                  color='primary'
+                  style={{
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    navigate('/mint/' + log.data.tokenId);
+                  }}
+                >
+                  #{log.data.tokenId}
+                </Typography>
+              </span>
               from{' '}
               <div className='flex items-center ml-1'>
                 <Address address={log.data.offeror} />
@@ -157,14 +178,28 @@ const Page: FC<{}> = () => {
           height: log.log.accountBlockHeight,
           description: (
             <div className='flex items-center'>
-              Traded{' '}
-              <div className='flex items-center ml-1'>
+              Traded
+              <span className='flex items-center ml-1'>
+                <Typography
+                  color='primary'
+                  style={{
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    navigate('/mint/' + log.data.tokenId);
+                  }}
+                >
+                  #{log.data.tokenId}
+                </Typography>
+              </span>
+              <span className='flex items-center ml-1'>
                 <Address address={log.data.offeror} copy={false} />
-              </div>{' '}
+              </span>{' '}
               {'→'}{' '}
-              <div className='flex items-center ml-1'>
+              <span className='flex items-center ml-1'>
                 <Address address={log.data.bidder} copy={false} />
-              </div>
+              </span>
             </div>
           ),
         });
@@ -180,22 +215,22 @@ const Page: FC<{}> = () => {
     };
 
     load();
-  }, [offerUpdatedEvents, bidUpdatedEvents, tradedEvents]);
+  }, [offerUpdatedEvents, bidUpdatedEvents, tradedEvents, navigate]);
 
   const mintTxParams = useMemo(
     () =>
-      !(mintTokenId && walletAddress)
+      !walletAddress
         ? null
         : {
             address: walletAddress,
-            abi: BAYC_ABI,
+            abi: BAYC_ABI as any,
             toAddress: baycContractAddress,
-            params: [mintTokenId],
+            params: [],
             methodName: 'safeMint',
             tokenId: VITE_TOKEN_ID,
-            amount: (1e18).toString(),
+            amount: (BigInt(10) * BigInt(10) ** BigInt(18)).toString(), // 10 vite
           },
-    [baycContractAddress, mintTokenId, walletAddress]
+    [baycContractAddress, walletAddress]
   );
   const mintTx = useCreateAccountBlock(
     'callContract',
@@ -210,9 +245,69 @@ const Page: FC<{}> = () => {
 
   useEffect(() => {
     if (mintTx.status === 'sent') {
-      setShowMintModal(false);
+      toast.success(`Mint request sent!`);
+      let start = Date.now();
+      (async () => {
+        while (true) {
+          // timeout after 150 seconds
+          if (start + 150 * 1000 < Date.now()) {
+            toast.error(`Mint request timeout`);
+            setShowMintModal(false);
+            break;
+          }
+          const hash = mintTx.block.hash;
+          const block = await provider.request(
+            'ledger_getAccountBlockByHash',
+            hash
+          );
+          if (!block.receiveBlockHash) {
+            await new Promise((r) => setTimeout(r, 1000));
+            continue;
+          }
+
+          const receiveBlock = await provider.request(
+            'ledger_getAccountBlockByHash',
+            block.receiveBlockHash
+          );
+          const data = Buffer.from(receiveBlock.data, 'base64');
+
+          if (data[32] !== 0) {
+            // error
+            setShowMintModal(false);
+            toast.error('The contract reverted the Mint request.');
+            break;
+          }
+
+          // the request is good
+          const vmlog = await provider.request(
+            'ledger_getVmLogs',
+            receiveBlock.hash
+          );
+
+          const log = vmlog?.[0];
+          if (
+            !log ||
+            log.topics[0] !==
+              'e9a7da5bfc2bcbf4266adfba50ac5d6fa9ba4d52df50d9359a3974c36c131ce1'
+          ) {
+            setShowMintModal(false);
+            toast.error("Couldn't find the correct log.");
+            break;
+          }
+
+          const id = BigInt(`0x${log.topics[3]}`);
+          toast.success(`Successfully minted Alien #${id}`);
+          setShowMintModal(false);
+
+          setShouldConfetti(true);
+          navigate('/mint/' + id);
+
+          break;
+        }
+      })();
     }
-  }, [mintTx]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, mintTx.status, provider]);
 
   const transferEventsFilter = useCallback(
     (log: DataLog<TransferEvent>) => true,
@@ -221,7 +316,7 @@ const Page: FC<{}> = () => {
   const transferEvents: DataLog<TransferEvent>[] = useVmLogs<TransferEvent>(
     provider,
     baycContractAddress,
-    BAYC_ABI,
+    BAYC_ABI as any,
     'Transfer',
     transferEventsFilter
   );
@@ -229,20 +324,28 @@ const Page: FC<{}> = () => {
     () => uniq(transferEvents.map((e) => e.data.tokenId)),
     [transferEvents]
   );
+  const availableMints = useMemo(() => 510 - mints.length, [mints]);
 
-  const toggleTraits = (k: string, v: string[]) => {
-    setTraits((traits: Traits) => {
-      const t = new Map(traits);
-      t.set(k, v);
-      return t;
-    });
-  };
+  useEffect(() => {
+    if (showMintModal && walletAddress) {
+      onMint();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showMintModal, walletAddress]);
 
   return (
     <>
       <div className={classes.container}>
         <div className='flex flex-col items-center'>
-          <div className='text-3xl font-bold mb-3'>BoredApeYachtClub</div>
+          <Typography
+            variant='h4'
+            style={{
+              fontWeight: 'bold',
+              marginBottom: 10,
+            }}
+          >
+            51 Aliens
+          </Typography>
           <Button
             variant='contained'
             color='primary'
@@ -250,23 +353,50 @@ const Page: FC<{}> = () => {
             disableElevation
             onClick={() => setShowMintModal(true)}
           >
-            MINT
+            Mint
           </Button>
+          <Typography
+            variant='subtitle2'
+            style={{
+              marginTop: 10,
+            }}
+          >
+            <Paper>
+              <div
+                style={{
+                  padding: '10px',
+                }}
+              >
+                {availableMints}/510 remaining
+              </div>
+              <LinearProgress
+                variant='determinate'
+                value={(availableMints / 510) * 100}
+                color={
+                  availableMints > 100
+                    ? 'primary'
+                    : availableMints > 50
+                    ? 'warning'
+                    : 'error'
+                }
+              />
+            </Paper>
+          </Typography>
         </div>
 
         <div className='flex flex-col mt-2'>
           <div className={clsx('mt-4 justify-center', classes.tabs)}>
-            {TABS.map((t) => (
-              <div
-                key={t}
-                className={clsx({
-                  [classes.activeTab]: t === activeTab,
-                })}
-                onClick={() => setActiveTab(t)}
-              >
-                {t}
-              </div>
-            ))}
+            <Tabs
+              onChange={(e, val) => {
+                setActiveTab(TABS[val]);
+              }}
+              value={TABS.indexOf(activeTab)}
+              indicatorColor='primary'
+            >
+              {TABS.map((e) => {
+                return <Tab key={e} label={e} />;
+              })}
+            </Tabs>
           </div>
 
           <div className={'mt-4'}>
@@ -337,22 +467,6 @@ const Page: FC<{}> = () => {
             />
           </div>
 
-          <div>
-            <TextField
-              fullWidth
-              disabled={!walletAddress}
-              label={'Token Id'}
-              placeholder={'Enter token id...'}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              value={mintTokenId}
-              onChange={(e) =>
-                setMintTokenId((e.target.value as string).trim())
-              }
-            />
-          </div>
-
           <div className='mt-4'>
             {!walletAddress ? (
               <Button variant='outlined' onClick={connect}>
@@ -360,7 +474,11 @@ const Page: FC<{}> = () => {
               </Button>
             ) : (
               <>
-                <Button variant='outlined' onClick={onMint}>
+                <Button
+                  variant='outlined'
+                  disabled={!!mintTx.working}
+                  onClick={onMint}
+                >
                   {mintTx.working || 'Mint'}
                 </Button>
               </>
@@ -372,41 +490,40 @@ const Page: FC<{}> = () => {
   );
 };
 
-type GetNftMetadata = {
-  image: string;
-  attributes: { trait_type: string; value: string }[];
-};
+//type GetNftMetadata = { trait_type: string; value: string }[];
 
 const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
-  const { baycContractAddress, marketplaceContractAddress } = useConfig();
+  const { /*baycContractAddress,*/ marketplaceContractAddress } = useConfig();
   const { provider } = useViteProvider();
 
   // const callOffChainMethodParams = useMemo(() => [Number(tokenId)], [tokenId]);
   // const tokenUriParams = useQueryContractState<string[]>(
   //   provider,
   //   baycContractAddress,
-  //   BAYC_ABI,
+  //   BAYC_ABI as any,
   //   'tokenURI',
   //   callOffChainMethodParams
   // );
 
-  const callOffChainMethodParams = useMemo(() => [], []);
+  /*const callOffChainMethodParams = useMemo(() => [], []);
   const baseUrlParams = useQueryContractState<string[]>(
     provider,
     baycContractAddress,
-    BAYC_ABI,
+    BAYC_ABI as any,
     'BASE_URL',
     callOffChainMethodParams
-  );
+  );*/
 
-  const getNftMetadata = useMemo(
+  //const getNftMetadata = `/aliens/${tokenId}.json`;
+  /*useMemo(
     () => (!baseUrlParams ? null : `${baseUrlParams[0]}${tokenId}`),
     [baseUrlParams, tokenId]
-  );
-  const nftMetadata = useIPFS<GetNftMetadata>(getNftMetadata);
-  const imgUrl = useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
+  );*/
+  //const nftMetadata = useGetRequest<GetNftMetadata>(getNftMetadata)//useIPFS<GetNftMetadata>(getNftMetadata);
+  const imgUrl = `/aliens/${tokenId}.png`;
+  /*useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
     nftMetadata,
-  ]);
+  ]);*/
 
   const tokenMarketsQueryParams = useMemo(() => [tokenId], [tokenId]);
   const tokenMarketsQueryEvents = useMemo(
@@ -416,7 +533,7 @@ const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
   const tokenMarketsQueryResult = useQueryContractState<string[]>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'tokenMarkets',
     tokenMarketsQueryParams,
     tokenMarketsQueryEvents
@@ -437,9 +554,10 @@ const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
   const hasOffer = useMemo(() => tokenMarkets?.offeror !== ZERO_ADDRESS, [
     tokenMarkets,
   ]);
+  /*
   const hasBid = useMemo(() => tokenMarkets?.bidder !== ZERO_ADDRESS, [
     tokenMarkets,
-  ]);
+  ]);*/
 
   return !imgUrl ? null : (
     <Link to={`/mint/${tokenId}`} className='flex flex-col'>

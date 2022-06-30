@@ -30,7 +30,7 @@ export const VitePrivatekeyProvider: FC<{ children: ReactNode }> = ({
 
     block.setPrivateKey(wallet.privateKey);
 
-    console.log(await block.sign().send());
+    return await block.sign().send();
   };
 
   return (

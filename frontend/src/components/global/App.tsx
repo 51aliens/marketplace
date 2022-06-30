@@ -1,23 +1,17 @@
 import React, { FC } from 'react';
-import { ThemeProvider } from '@material-ui/core/styles';
-import { CssBaseline } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 
 import Layout from '@components/global/Layout';
 import theme from '@utils/theme';
 import { ConfigProvider } from '@contexts/config';
-import {
-  ViteProvider,
-  ViteConnectProvider,
-  VitePrivatekeyProvider,
-} from '@react-vite';
+import { ViteProvider, ViteConnectProvider } from '@react-vite';
 
-const ViteWalletProvider = import.meta.env.PROD
-  ? ViteConnectProvider
-  : VitePrivatekeyProvider;
+const ViteWalletProvider = ViteConnectProvider;
 
 const App: FC = () => {
   return (
-    <ThemeProvider {...{ theme }}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
 
       <ViteProvider>

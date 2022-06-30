@@ -16,5 +16,6 @@
   },
   "resolutions": {
     "@vite/solppc": "https://github.com/vitelabs/solppc-js.git#v0.8.10"
-  }
+  },
+  "dependencies": {}
 }

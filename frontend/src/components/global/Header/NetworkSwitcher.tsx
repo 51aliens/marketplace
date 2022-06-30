@@ -1,14 +1,15 @@
 import React, { FC, useState } from 'react';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import { useViteProvider, Network } from '@react-vite';
 
 const NETWORKS = [
   // 'mainnet',
   'testnet',
-  'localnet',
+  'thomiznet',
+  'local',
 ];
 
 const NetworkSwitcher: FC = () => {
@@ -32,7 +33,7 @@ const NetworkSwitcher: FC = () => {
     <Box ml={2}>
       <Button
         variant='outlined'
-        color='default'
+        color='inherit'
         aria-haspopup='true'
         onClick={(e) => handleOpenMenu(e.currentTarget)}
       >

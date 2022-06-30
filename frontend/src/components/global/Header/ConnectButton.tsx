@@ -1,25 +1,23 @@
 import React, { FC } from 'react';
-import { useHistory } from 'react-router-dom';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
+import { useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 
 import { abbrAddress } from '@utils/string';
 import { useViteWallet } from '@react-vite';
 
 const ConnectButton: FC = () => {
   const { walletAddress, connect } = useViteWallet();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <>
       <Box ml={2}>
         <Button
           variant='outlined'
-          color='default'
+          color='inherit'
           onClick={() =>
-            walletAddress
-              ? history.push(`/profile/${walletAddress}`)
-              : connect()
+            walletAddress ? navigate(`/profile/${walletAddress}`) : connect()
           }
         >
           {walletAddress ? abbrAddress(walletAddress, 5 + 5, 5) : 'Connect'}

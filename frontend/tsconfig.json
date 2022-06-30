@@ -24,10 +24,9 @@
       "@modals/*": ["./src/modals/*"],
       "@pages/*": ["./src/pages/*"],
       "@utils/*": ["./src/utils/*"],
-      "@config/*": ["./src/config/*"],
-      "@types/*": ["./src/types/*"],
       "@data/*": ["./src/data/*"],
-      "@react-vite/*": ["./src/react-vite/*"]
+      "@react-vite/*": ["./src/react-vite/*"],
+      "@react-vite": ["./src/react-vite/index.ts"]
     }
   },
   "include": ["src"],

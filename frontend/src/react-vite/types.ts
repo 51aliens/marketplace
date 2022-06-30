@@ -1,7 +1,7 @@
 export type TxStatus = 'pending' | 'sending' | 'sent';
 
-// export type Network = 'mainnet' | 'testnet' | 'localnet';
-export type Network = 'testnet' | 'localnet';
+// export type Network = 'mainnet' | 'testnet' | 'local';
+export type Network = 'testnet' | 'thomiznet' | 'local';
 
 export type Fragment = {
   anonymous: boolean;

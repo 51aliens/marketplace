@@ -12,6 +12,7 @@ export function useCreateAccountBlock(
   createAccountBlock: CreateAccountBlockFn
 ) {
   const [status, setStatus] = useState<TxStatus>('pending');
+  const [block, setBlock] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   const working = useMemo(() => status === 'sending', [status]);
@@ -19,15 +20,18 @@ export function useCreateAccountBlock(
   const send = async () => {
     try {
       setStatus('sending');
-      await createAccountBlock(typ, params);
+      const block = await createAccountBlock(typ, params);
+      setBlock(block);
       await sleep(2000);
       setStatus('sent');
+      await sleep(1);
     } catch (e) {
       const errMsg = (e as Error).message;
       toast.error(errMsg);
       setError(errMsg);
     } finally {
       setStatus('pending');
+      setBlock(null);
     }
   };
 
@@ -47,5 +51,6 @@ export function useCreateAccountBlock(
     status,
     send,
     error,
+    block,
   };
 }

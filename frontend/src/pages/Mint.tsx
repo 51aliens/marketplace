@@ -1,14 +1,13 @@
 import React, {
   ReactNode,
-  FC,
   useState,
   useMemo,
   useEffect,
   useCallback,
 } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button, TextField, Dialog } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { Button, TextField, Dialog, Tabs, Tab } from '@mui/material';
 import CloseIcon from '@material-ui/icons/Close';
 import {
   DataLog,
@@ -18,16 +17,18 @@ import {
   useQueryContractState,
   useVmLogs,
 } from '@react-vite';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import ReactCanvasConfetti from 'react-canvas-confetti';
 
 import { useConfig } from '@contexts/config';
-import useIPFS, { getIPFSKeyUrl } from '@hooks/useIPFS';
+//import useIPFS, { getIPFSKeyUrl } from '@hooks/useIPFS';
 import BAYC_ABI from '@data/bayc-abi.json';
 import MARKETPLACE_ABI from '@data/marketplace-abi.json';
 import { formatUnits, toBigNumber } from '@utils/big-number';
 import Address from '@components/shared/Address';
-import { OfferUpdatedEvent, BidUpdatedEvent, TradedEvent } from '@types';
-import { ZERO_ADDRESS, VITE_TOKEN_ID } from '@config';
+import { OfferUpdatedEvent, BidUpdatedEvent, TradedEvent } from '../types';
+import { ZERO_ADDRESS, VITE_TOKEN_ID } from '../config';
+import useGetRequest from '@hooks/useGetRequest';
 
 const TABS = ['Details', 'Bids', 'History'];
 
@@ -58,18 +59,22 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-type GetNftMetadata = {
-  image: string;
-  attributes: { trait_type: string; value: string }[];
-};
+type GetNftMetadata = { trait_type: string; value: string }[];
 
 type Log = { id: string; height: string; description: ReactNode };
 
-const Page: FC<{ match: { params: { tokenId: string } } }> = ({
-  match: {
-    params: { tokenId },
-  },
-}) => {
+export let shouldConfetti = false;
+export function setShouldConfetti(value: boolean) {
+  shouldConfetti = value;
+}
+
+const Page = () => {
+  const params = useParams<{
+    tokenId: string;
+  }>();
+  const tokenId = params.tokenId as string;
+  const sConfetti = shouldConfetti;
+  shouldConfetti = false;
   const classes = useStyles();
   const { baycContractAddress, marketplaceContractAddress } = useConfig();
   const { provider } = useViteProvider();
@@ -99,7 +104,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const offerUpdatedEvents: DataLog<OfferUpdatedEvent>[] = useVmLogs<OfferUpdatedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'OfferUpdated',
     offerUpdatedEventsFilter
   );
@@ -107,7 +112,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const bidUpdatedEvents: DataLog<BidUpdatedEvent>[] = useVmLogs<BidUpdatedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'BidUpdated',
     bidUpdatedEventsFilter
   );
@@ -115,7 +120,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const tradedEvents: DataLog<TradedEvent>[] = useVmLogs<TradedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'Traded',
     tradedEventsFilter
   );
@@ -210,29 +215,28 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
     return list;
   }, [bidUpdatedEvents]);
 
-  const baseUrlQueryParams = useMemo(() => [], []);
+  /*const baseUrlQueryParams = useMemo(() => [], []);
   const baseUrlQueryResult = useQueryContractState<string[]>(
     provider,
     baycContractAddress,
-    BAYC_ABI,
+    BAYC_ABI as any,
     'BASE_URL',
     baseUrlQueryParams
-  );
-  const getNftMetadata = useMemo(
-    () => (!baseUrlQueryResult ? null : `${baseUrlQueryResult[0]}${tokenId}`),
-    [baseUrlQueryResult, tokenId]
-  );
-  const nftMetadata = useIPFS<GetNftMetadata>(getNftMetadata);
-  const imgUrl = useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
+  );_*/
+  const getNftMetadata = `/aliens/${tokenId}.json`;
+  const nftMetadata = useGetRequest<GetNftMetadata>(getNftMetadata);
+  const imgUrl = `/aliens/${tokenId}.png`;
+
+  /*useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
     nftMetadata,
-  ]);
+  ]);*/
 
   const ownerOfQueryParams = useMemo(() => [tokenId], [tokenId]);
   const ownerOfQueryEvents = useMemo(() => ['Transfer'], []);
   const ownerOfQueryResult = useQueryContractState<string[]>(
     provider,
     baycContractAddress,
-    BAYC_ABI,
+    BAYC_ABI as any,
     'ownerOf',
     ownerOfQueryParams,
     ownerOfQueryEvents
@@ -253,7 +257,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const tokenMarketsQueryResult = useQueryContractState<string[]>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'tokenMarkets',
     tokenMarketsQueryParams,
     tokenMarketsQueryEvents
@@ -293,9 +297,9 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const isApprovedForAllQueryResult = useQueryContractState<string[]>(
     provider,
     baycContractAddress,
-    BAYC_ABI,
+    BAYC_ABI as any,
     'isApprovedForAll',
-    isApprovedForAllQueryParams,
+    isApprovedForAllQueryParams as string[],
     isApprovedForAllQueryEvents
   );
   const isApprovedForAll = useMemo(
@@ -306,7 +310,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const setApprovalForAllParams = useMemo(
     () => ({
       address: walletAddress,
-      abi: BAYC_ABI,
+      abi: BAYC_ABI as any,
       toAddress: baycContractAddress,
       params: [marketplaceContractAddress, true],
       methodName: 'setApprovalForAll',
@@ -322,9 +326,9 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const listParams = useMemo(
     () => ({
       address: walletAddress,
-      abi: MARKETPLACE_ABI,
+      abi: MARKETPLACE_ABI as any,
       toAddress: marketplaceContractAddress,
-      params: [tokenId, toBigNumber(price).times(1e18).toString()],
+      params: [tokenId, toBigNumber(price).shiftedBy(18).toFixed(0)],
       methodName: 'offer',
     }),
     [walletAddress, marketplaceContractAddress, tokenId, price]
@@ -338,7 +342,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const delistParams = useMemo(
     () => ({
       address: walletAddress,
-      abi: MARKETPLACE_ABI,
+      abi: MARKETPLACE_ABI as any,
       toAddress: marketplaceContractAddress,
       params: [tokenId],
       methodName: 'revokeOffer',
@@ -354,7 +358,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const bidParams = useMemo(
     () => ({
       address: walletAddress,
-      abi: MARKETPLACE_ABI,
+      abi: MARKETPLACE_ABI as any,
       toAddress: marketplaceContractAddress,
       params: [tokenId],
       methodName: lastSelfBid ? 'bidIncrease' : 'bid',
@@ -372,7 +376,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
   const removeBidParams = useMemo(
     () => ({
       address: walletAddress,
-      abi: MARKETPLACE_ABI,
+      abi: MARKETPLACE_ABI as any,
       toAddress: marketplaceContractAddress,
       params: [tokenId],
       methodName: 'revokeBid',
@@ -391,7 +395,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
         ? null
         : {
             address: walletAddress,
-            abi: MARKETPLACE_ABI,
+            abi: MARKETPLACE_ABI as any,
             toAddress: marketplaceContractAddress,
             params: [tokenId],
             methodName: 'bid',
@@ -412,7 +416,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
         ? null
         : {
             address: walletAddress,
-            abi: MARKETPLACE_ABI,
+            abi: MARKETPLACE_ABI as any,
             toAddress: marketplaceContractAddress,
             params: [tokenId, tokenMarkets?.lockedBid],
             methodName: 'offer',
@@ -470,14 +474,14 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
     <>
       <div className={clsx(classes.container, 'grid grid-cols-2')}>
         <div>
-          <img src={imgUrl} alt={`${tokenId} nft`} />
+          <img src={imgUrl} alt={`${tokenId} nft`} draggable={false} />
         </div>
         <div className='ml-10'>
           <div>
             <Link className={clsx(classes.heading, 'hover:underline')} to='/'>
-              BoredApeYachtClub
+              51 Aliens
             </Link>
-            <div className={classes.heading}>#{tokenId}</div>
+            <span className={classes.heading}> #{tokenId}</span>
             {!owner ? null : (
               <div className='flex'>
                 Owned by{' '}
@@ -515,26 +519,24 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
               )}
             </div>
 
-            <div className={clsx('mt-4', classes.tabs)}>
-              {TABS.map((t) => (
-                <div
-                  key={t}
-                  className={clsx({
-                    [classes.activeTab]: t === activeTab,
-                  })}
-                  onClick={() => setActiveTab(t)}
-                >
-                  {t}
-                </div>
-              ))}
-            </div>
+            <Tabs
+              onChange={(e, val) => {
+                setActiveTab(TABS[val]);
+              }}
+              value={TABS.indexOf(activeTab)}
+              indicatorColor='primary'
+            >
+              {TABS.map((e) => {
+                return <Tab key={e} label={e} />;
+              })}
+            </Tabs>
 
             <div className={clsx('mt-4', classes.pane)}>
               {TABS[0] !== activeTab ? null : (
                 <div className='grid grid-cols-4 gap-2'>
                   {!nftMetadata
                     ? null
-                    : nftMetadata.attributes.map((attr) => (
+                    : nftMetadata.map((attr) => (
                         <div
                           key={attr.trait_type}
                           className='flex flex-col items-center justify-center py-2 border rounded-lg'
@@ -542,7 +544,12 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
                           <div className={'text-primary font-bold'}>
                             {attr.trait_type}
                           </div>
-                          <div className='text-gray-500 text-xs'>
+                          <div
+                            className='text-gray-500 text-xs'
+                            style={{
+                              textAlign: 'center',
+                            }}
+                          >
                             {attr.value}
                           </div>
                         </div>
@@ -594,7 +601,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
                     : 'List item'}
                 </Button>
                 {!(isApprovedForAll && hasOffer) ? null : (
-                  <Button variant='outlined' color='default' onClick={onDelist}>
+                  <Button variant='outlined' color='primary' onClick={onDelist}>
                     {delistTx.working || <>Delist</>}
                   </Button>
                 )}
@@ -618,7 +625,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
                 )}
                 <Button
                   variant='outlined'
-                  color='default'
+                  color='inherit'
                   onClick={() => setShowTxModal(true)}
                 >
                   {lastSelfBid
@@ -632,7 +639,7 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
                 {!lastSelfBid ? null : (
                   <Button
                     variant='outlined'
-                    color='default'
+                    color='inherit'
                     onClick={onRemoveBid}
                   >
                     {removeBidTx.working || (
@@ -705,8 +712,51 @@ const Page: FC<{ match: { params: { tokenId: string } } }> = ({
           </div>
         </div>
       </Dialog>
+      {
+        // @ts-ignore
+        <ReactCanvasConfetti
+          refConfetti={(e: any) => {
+            if (!sConfetti) return;
+            if (!e) return;
+            let i = 0;
+            while (i < 20) {
+              setTimeout(() => {
+                e(getAnimationSettings(60, 0, 40, 50));
+                e(getAnimationSettings(45, 0, 80, 100));
+                e(getAnimationSettings(120, 1, 40, 50));
+                e(getAnimationSettings(135, 1, 80, 100));
+              }, i * 50);
+              i++;
+            }
+          }}
+          style={{
+            position: 'fixed',
+            pointerEvents: 'none',
+            width: '100%',
+            height: '100%',
+            top: 0,
+            left: 0,
+          }}
+        />
+      }
     </>
   );
 };
+
+function getAnimationSettings(
+  angle: number,
+  originX: number,
+  particleCount: number,
+  velocity: number
+) {
+  return {
+    particleCount,
+    angle,
+    spread: 55,
+    origin: { x: originX },
+    colors: ['#B694EE', '#ffffff'],
+    startVelocity: velocity,
+  };
+}
 
 export default Page;

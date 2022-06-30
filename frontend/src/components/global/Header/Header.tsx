@@ -1,16 +1,23 @@
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Typography from '@material-ui/core/Typography';
-import Toolbar from '@material-ui/core/Toolbar';
+import { makeStyles } from '@mui/styles';
+import AppBar from '@mui/material/AppBar';
+import Typography from '@mui/material/Typography';
+import Toolbar from '@mui/material/Toolbar';
 import NetworkSwitcher from './NetworkSwitcher';
 import ConnectButton from './ConnectButton';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   container: {
     boxShadow: 'none',
-    background: 'white',
+    background: '#000',
+  },
+  logo: {
+    height: 30,
+    marginRight: 10,
+  },
+  title: {
+    fontWeight: 'bold',
   },
 }));
 
@@ -18,11 +25,19 @@ const Header: FC = () => {
   const classes = useStyles();
 
   return (
-    <AppBar position='fixed' color='inherit' className={classes.container}>
-      <Toolbar color='inherit'>
+    <AppBar position='fixed' color='secondary' className={classes.container}>
+      <Toolbar color='secondary'>
         <Link to='/' className='flex flex-grow'>
-          <img src='/vite.svg' alt='logo' height={30} width={30} />
-          <Typography variant='h6'>Marketplace</Typography>
+          <img
+            src='/favicon.png'
+            alt='logo'
+            height={30}
+            width={30}
+            className={classes.logo}
+          />
+          <Typography variant='h6' className={classes.title}>
+            51 Aliens
+          </Typography>
         </Link>
         <ConnectButton />
         <NetworkSwitcher />

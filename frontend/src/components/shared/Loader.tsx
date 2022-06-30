@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Loader: FC<{
   size?: number;

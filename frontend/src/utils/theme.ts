@@ -1,47 +1,50 @@
-import { createTheme } from '@material-ui/core/styles';
-import { BORDER_RADIUS } from '@config';
+import { createTheme, Theme } from '@mui/material/styles';
+import { BORDER_RADIUS } from '../config';
+
+declare module '@mui/styles' {
+  interface DefaultTheme extends Theme {}
+}
 
 export default createTheme({
   typography: {
     fontFamily: ['Metropolis', 'Helvetica', 'Arial', 'sans-serif'].join(','),
   },
   palette: {
+    mode: 'dark',
     background: {
-      default: '#fff',
-      paper: '#fff',
+      default: '#000',
     },
     primary: {
-      main: '#006fe9',
+      main: '#BD92F4',
     },
     secondary: {
-      main: 'rgba(0, 0, 0, 0.5)', // rgb(9, 9, 47)
+      main: 'rgba(255, 255, 255, 0.5)', // rgb(9, 9, 47)
     },
   },
-  overrides: {
+  components: {
     MuiButton: {
-      root: {
-        borderRadius: BORDER_RADIUS,
+      styleOverrides: {
+        root: {
+          borderRadius: BORDER_RADIUS,
+        },
       },
     },
     MuiPaper: {
-      rounded: {
-        borderRadius: BORDER_RADIUS,
+      styleOverrides: {
+        rounded: {
+          borderRadius: BORDER_RADIUS,
+        },
+        root: {
+          backgroundImage: 'unset',
+        },
       },
     },
     MuiDialog: {
-      paper: {
-        borderRadius: BORDER_RADIUS,
+      styleOverrides: {
+        paper: {
+          borderRadius: BORDER_RADIUS,
+        },
       },
     },
-    // MuiInput: {
-    //   underline: {
-    //     '&:before': {
-    //       borderBottomColor: '#313131',
-    //     },
-    //     '&:after': {
-    //       borderBottomColor: '#313131',
-    //     },
-    //   },
-    // },
   },
 });

@@ -4,7 +4,7 @@ import { WS_RPC } from '../vite';
 import { Network } from '../types';
 
 export const ViteProviderContext = createContext<{
-  network: string;
+  network: Network;
   setNetwork: (s: Network) => void;
   baseBlockexplorerUrl: string;
   provider: typeof WS_RPC;

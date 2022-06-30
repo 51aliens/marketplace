@@ -1,12 +1,14 @@
 import React, { FC } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Header from './Header';
 import Landing from '@pages/Landing';
 import Profile from '@pages/Profile';
 import Mint from '@pages/Mint';
+import { Toaster } from 'react-hot-toast';
+import Warning from './Warning';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -40,12 +42,14 @@ const Layout: FC = () => {
     <Router>
       <Box className={classes.container}>
         <Header />
+        <Toaster position='bottom-center' />
 
-        <Switch>
-          <Route exact path={'/'} component={Landing} />
-          <Route exact path={'/profile/:walletAddress'} component={Profile} />
-          <Route exact path={'/mint/:tokenId'} component={Mint} />
-        </Switch>
+        <Routes>
+          <Route path={'/'} element={<Landing />} />
+          <Route path={'/profile/:walletAddress'} element={<Profile />} />
+          <Route path={'/mint/:tokenId'} element={<Mint />} />
+        </Routes>
+        <Warning />
       </Box>
     </Router>
   );

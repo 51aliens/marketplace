@@ -8,9 +8,10 @@ import React, {
 import { Network, useViteProvider } from '@react-vite';
 
 const BAYC_CONTRACT_ADDRESSES: Record<Network, string> = {
-  mainnet: '',
-  testnet: 'vite_a6b7ca14d5ce26c7f0356b2b128ef5769356d9aa727acb4542',
-  localnet: 'vite_129c940d475daf59569437bffb701e1b078daad68d78e58489',
+  //mainnet: 'vite_8fad5a10ff04c23e07aa738a8c48e382c8c51eeed8a28c082c',
+  testnet: 'vite_79fafa1d344b2a77fec46a536e73b73c9102f0436bd9caf2a3',
+  thomiznet: 'vite_64f217293161513bec4c9df04cf25e0305ac46aebebfee6524',
+  local: 'vite_8fad5a10ff04c23e07aa738a8c48e382c8c51eeed8a28c082c',
 };
 
 const MARKETPLACE_CONTRACT_ADDRESSES: Record<
@@ -21,7 +22,7 @@ const MARKETPLACE_CONTRACT_ADDRESSES: Record<
 // const MARKETPLACE_CONTRACT_ADDRESSES: Record<Network, string> = {
 //   mainnet: '',
 //   testnet: '',
-//   localnet: 'vite_129c940d475daf59569437bffb701e1b078daad68d78e58489',
+//   local: 'vite_129c940d475daf59569437bffb701e1b078daad68d78e58489',
 // };
 
 const ConfigContext = createContext<{

@@ -7,11 +7,11 @@ import "./Withdrawable.solpp";
 
 
 contract NFTMarketplace is ERC721Enumerable, Ownable, Withdrawable {
-    uint256 public mintingFee = 1 ether;
-    uint256 public maxApes = 1 ether;
-    string public constant BASE_URL = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
+    uint256 public mintingFee = 10 vite;
+    uint256 public maxAliens = 510;
+    string public constant BASE_URL = "ipfs://QmfUAm1dNMuy5LsvV1rhfHiTWsdyjdNLYoAabVvRY5uAU5/";
 
-    constructor() ERC721("BoredApeYachtClub", "BAYC") {
+    constructor() ERC721("51 Aliens", "51AL") {
         feePortion = 100; 
     }
 
@@ -23,10 +23,43 @@ contract NFTMarketplace is ERC721Enumerable, Ownable, Withdrawable {
         return _exists(tokenId);
     }
 
-    function safeMint(uint256 tokenId) public payable {
+    mapping(uint => uint) public free_nfts;
+    uint256 public free_nfts_count = 0;
+    bool public isMintingEnabled;
+
+    function fillFreeNfts() external {
+        require(!isMintingEnabled, "Minting is already enabled");
+        uint max = free_nfts_count + 50;
+        if(max > maxAliens){
+            max = maxAliens;
+        }
+        for(uint i = free_nfts_count; i < max; i++){
+            free_nfts[i] = i;
+        }
+        free_nfts_count = max;
+        // if we're at the end, enable minting
+        isMintingEnabled = max == maxAliens;
+    }
+
+    function safeMint() public payable {
+        require(isMintingEnabled, "Minting is not enabled");
+        require(free_nfts_count > 0, "Minting has ended");
         require(msg.token == viteTokenId, "Fund should be vite");
         require(msg.value >= mintingFee, "Insufficient funds");
-        require(tokenId < maxApes, "Purchase would exceed max supply of apes");
+
+        uint index = random64() % free_nfts_count;
+        uint tokenId = free_nfts[index];
+
+        if(index != free_nfts_count - 1){
+            // we need to shift
+            free_nfts[index] = free_nfts[free_nfts_count - 1];
+            delete free_nfts[free_nfts_count - 1];
+        }else{
+            delete free_nfts[index];
+        }
+
+        free_nfts_count--;
+
         _mint(msg.sender, tokenId);
     }
 
@@ -98,7 +131,7 @@ contract NFTMarketplace is ERC721Enumerable, Ownable, Withdrawable {
     /// @notice Any token owner may offer it for sale
     /// @dev    If a bid comes which is higher than the offer then the sale price will be this higher amount.
     /// @param  tokenId       which token
-    /// @param  minimumOffer  the amount (in Wei) that is the minimum to accept
+    /// @param  minimumOffer  the amount (in Attov) that is the minimum to accept
     function offer(
         uint256 tokenId,
         uint256 minimumOffer

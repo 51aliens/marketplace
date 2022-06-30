@@ -51,7 +51,9 @@ export function useVmLogs<T>(
     const filterParams = {
       addressHeightRange: {
         [contractAddress]: {
-          fromHeight: '0',
+          // new gvite update sets 0 to latest block height
+          // use 1
+          fromHeight: '1',
           toHeight: '0',
         },
       },

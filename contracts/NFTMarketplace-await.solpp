@@ -9,7 +9,7 @@ import "./Withdrawable.solpp";
 contract BAYC is ERC721Enumerable {
     vitetoken public constant viteTokenId = "tti_5649544520544f4b454e6e40";
     uint256 public mintingFee = 1 ether;
-    uint256 public maxApes = 1 ether;
+    uint256 public maxAliens = 1 ether;
     string public constant BASE_URL = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
 
     constructor() ERC721("BoredApeYachtClub", "BAYC") {
@@ -26,7 +26,7 @@ contract BAYC is ERC721Enumerable {
     function safeMint(uint256 tokenId) public payable {
         require(msg.token == viteTokenId, "Fund should be vite");
         require(msg.value >= mintingFee, "Insufficient funds");
-        require(tokenId < maxApes, "Purchase would exceed max supply of apes");
+        require(tokenId < maxAliens, "Purchase would exceed max supply of apes");
         _mint(msg.sender, tokenId);
     }
 

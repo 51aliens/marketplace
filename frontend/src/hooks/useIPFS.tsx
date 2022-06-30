@@ -10,5 +10,7 @@ function useIPFS<T>(key: string | null) {
 export default useIPFS;
 
 export function getIPFSKeyUrl(key: string | null) {
-  return !key ? null : `https://ipfs.io/ipfs/${key.replace('ipfs://', '')}`;
+  if (!key) return null;
+
+  return `https://node-ipfs.thomiz.dev/ipfs/${key.slice('ipfs://'.length)}`;
 }

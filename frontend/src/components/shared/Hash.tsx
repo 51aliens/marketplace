@@ -1,12 +1,12 @@
 import React, { FC, useMemo } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
+import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box';
 import { useViteProvider } from '@react-vite';
 
 const useStyles = makeStyles((theme) => ({
   container: {
-    color: '#006fe9 !important',
+    color: '#BD92F4 !important',
   },
 }));
 

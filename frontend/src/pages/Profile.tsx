@@ -6,27 +6,22 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button, TextField, Dialog } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { makeStyles } from '@mui/styles';
 import {
   DataLog,
   useViteProvider,
-  useViteWallet,
-  useCreateAccountBlock,
   useVmLogs,
   useQueryContractState,
 } from '@react-vite';
 import uniq from 'lodash/uniq';
 
 import { useConfig } from '@contexts/config';
-import useIPFS, { getIPFSKeyUrl } from '@hooks/useIPFS';
+//import useIPFS, { getIPFSKeyUrl } from '@hooks/useIPFS';
 import BAYC_ABI from '@data/bayc-abi.json';
-import BAYC_TRAITS from '@data/bayc-traits.json';
 import MARKETPLACE_ABI from '@data/marketplace-abi.json';
-import { VITE_TOKEN_ID, ZERO_ADDRESS } from '@config';
+import { ZERO_ADDRESS } from '../config';
 import { formatUnits, toBigNumber } from '@utils/big-number';
 import Address from '@components/shared/Address';
 import {
@@ -34,13 +29,14 @@ import {
   BidUpdatedEvent,
   TradedEvent,
   TransferEvent,
-} from '@types';
+} from '../types';
+import { Tab, Tabs } from '@mui/material';
+//import useGetRequest from '@hooks/useGetRequest';
 
 const useStyles = makeStyles((theme) => {
   return {
     container: {},
     tabs: {
-      borderBottom: '1px solid #eee',
       display: 'flex',
       '& > div': {
         padding: '0.5rem 1rem',
@@ -59,11 +55,11 @@ const TABS = ['Items', 'Activity'];
 
 type Log = { id: string; height: string; description: ReactNode };
 
-const Page: FC<{ match: { params: { walletAddress: string } } }> = ({
-  match: {
-    params: { walletAddress },
-  },
-}) => {
+const Page = () => {
+  const params = useParams<{
+    walletAddress: string;
+  }>();
+  const walletAddress = params.walletAddress as string;
   const classes = useStyles();
   const { baycContractAddress, marketplaceContractAddress } = useConfig();
   const { provider } = useViteProvider();
@@ -90,7 +86,7 @@ const Page: FC<{ match: { params: { walletAddress: string } } }> = ({
   const offerUpdatedEvents: DataLog<OfferUpdatedEvent>[] = useVmLogs<OfferUpdatedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'OfferUpdated',
     offerUpdatedEventsFilter
   );
@@ -98,7 +94,7 @@ const Page: FC<{ match: { params: { walletAddress: string } } }> = ({
   const bidUpdatedEvents: DataLog<BidUpdatedEvent>[] = useVmLogs<BidUpdatedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'BidUpdated',
     bidUpdatedEventsFilter
   );
@@ -106,7 +102,7 @@ const Page: FC<{ match: { params: { walletAddress: string } } }> = ({
   const tradedEvents: DataLog<TradedEvent>[] = useVmLogs<TradedEvent>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'Traded',
     tradedEventsFilter
   );
@@ -189,7 +185,7 @@ const Page: FC<{ match: { params: { walletAddress: string } } }> = ({
   const transferEvents: DataLog<TransferEvent>[] = useVmLogs<TransferEvent>(
     provider,
     baycContractAddress,
-    BAYC_ABI,
+    BAYC_ABI as any,
     'Transfer',
     transferEventsFilter
   );
@@ -208,17 +204,17 @@ const Page: FC<{ match: { params: { walletAddress: string } } }> = ({
 
       <div className='flex flex-col mt-2'>
         <div className={clsx('mt-4 justify-center', classes.tabs)}>
-          {TABS.map((t) => (
-            <div
-              key={t}
-              className={clsx({
-                [classes.activeTab]: t === activeTab,
-              })}
-              onClick={() => setActiveTab(t)}
-            >
-              {t}
-            </div>
-          ))}
+          <Tabs
+            onChange={(e, val) => {
+              setActiveTab(TABS[val]);
+            }}
+            value={TABS.indexOf(activeTab)}
+            indicatorColor='primary'
+          >
+            {TABS.map((e) => {
+              return <Tab key={e} label={e} />;
+            })}
+          </Tabs>
         </div>
 
         <div className={'mt-4'}>
@@ -243,29 +239,26 @@ const Page: FC<{ match: { params: { walletAddress: string } } }> = ({
   );
 };
 
-type GetNftMetadata = {
-  image: string;
-  attributes: { trait_type: string; value: string }[];
-};
+//type GetNftMetadata = { trait_type: string; value: string }[];
 
 const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
-  const { baycContractAddress, marketplaceContractAddress } = useConfig();
+  const { /*baycContractAddress,*/ marketplaceContractAddress } = useConfig();
   const { provider } = useViteProvider();
 
   // const callOffChainMethodParams = useMemo(() => [Number(tokenId)], [tokenId]);
   // const tokenUriParams = useQueryContractState<string[]>(
   //   provider,
   //   baycContractAddress,
-  //   BAYC_ABI,
+  //   BAYC_ABI as any,
   //   'tokenURI',
   //   callOffChainMethodParams
   // );
 
-  const callOffChainMethodParams = useMemo(() => [], []);
+  /*const callOffChainMethodParams = useMemo(() => [], []);
   const baseUrlParams = useQueryContractState<string[]>(
     provider,
     baycContractAddress,
-    BAYC_ABI,
+    BAYC_ABI as any,
     'BASE_URL',
     callOffChainMethodParams
   );
@@ -274,10 +267,11 @@ const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
     () => (!baseUrlParams ? null : `${baseUrlParams[0]}${tokenId}`),
     [baseUrlParams, tokenId]
   );
-  const nftMetadata = useIPFS<GetNftMetadata>(getNftMetadata);
-  const imgUrl = useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
+  const nftMetadata = useIPFS<GetNftMetadata>(getNftMetadata);*/
+  const imgUrl = `/aliens/${tokenId}.png`;
+  /*useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
     nftMetadata,
-  ]);
+  ]);*/
 
   const tokenMarketsQueryParams = useMemo(() => [tokenId], [tokenId]);
   const tokenMarketsQueryEvents = useMemo(
@@ -287,7 +281,7 @@ const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
   const tokenMarketsQueryResult = useQueryContractState<string[]>(
     provider,
     marketplaceContractAddress,
-    MARKETPLACE_ABI,
+    MARKETPLACE_ABI as any,
     'tokenMarkets',
     tokenMarketsQueryParams,
     tokenMarketsQueryEvents
@@ -308,9 +302,11 @@ const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
   const hasOffer = useMemo(() => tokenMarkets?.offeror !== ZERO_ADDRESS, [
     tokenMarkets,
   ]);
+  /*
   const hasBid = useMemo(() => tokenMarkets?.bidder !== ZERO_ADDRESS, [
     tokenMarkets,
   ]);
+  */
 
   return !imgUrl ? null : (
     <Link to={`/mint/${tokenId}`} className='flex flex-col'>

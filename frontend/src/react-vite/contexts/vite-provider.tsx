@@ -6,27 +6,37 @@ import { ViteProviderContext } from './vite';
 
 const VITE_BLOCK_EXPLORERS: Record<Network, string> = {
   // mainnet: 'https://viteview.xyz/#',
-  testnet: 'https://buidl.viteview.xyz/#',
-  localnet: 'https://viteview.xyz/#',
+  testnet: 'https://testnet.vitcscan.com',
+  thomiznet: 'https://thomiznet.vitcscan.com',
+  local: 'https://debug.vitcscan.com',
 };
 
 const VITE_PROVIDER_URLS: Record<Network, string> = {
   // mainnet: 'wss://node.vite.net/gvite/ws',
   testnet: 'wss://buidl.vite.net/gvite/ws',
-  localnet: 'ws://0.0.0.0:23457',
+  thomiznet: 'wss://node-vite-testnet.thomiz.dev/ws',
+  local: 'ws://127.0.0.1:23457',
 };
 
 export const ViteProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [network, setNetwork] = useState<Network>(
-    import.meta.env.PROD ? 'testnet' : 'localnet'
-  );
+  const [network, setNetwork] = useState<Network>('thomiznet');
 
   const baseBlockexplorerUrl = useMemo(() => VITE_BLOCK_EXPLORERS[network], [
     network,
   ]);
 
   const provider = useMemo(
-    () => new vite.ViteAPI(new WS_RPC(VITE_PROVIDER_URLS[network]), () => {}),
+    () =>
+      new vite.ViteAPI(
+        new WS_RPC(VITE_PROVIDER_URLS[network], 6e4, {
+          protocol: '',
+          headers: '',
+          clientConfig: '',
+          retryTimes: Infinity,
+          retryInterval: 10000,
+        }),
+        () => {}
+      ),
     [network]
   );
 
