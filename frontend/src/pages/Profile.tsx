@@ -15,7 +15,6 @@ import {
   useVmLogs,
   useQueryContractState,
 } from '@react-vite';
-import uniq from 'lodash/uniq';
 
 import { useConfig } from '@contexts/config';
 //import useIPFS, { getIPFSKeyUrl } from '@hooks/useIPFS';

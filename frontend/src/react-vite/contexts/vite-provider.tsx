@@ -5,7 +5,7 @@ import { Network } from '../types';
 import { ViteProviderContext } from './vite';
 
 const VITE_BLOCK_EXPLORERS: Record<Network, string> = {
-  mainnet: 'https://vitcscan.com/',
+  mainnet: 'https://vitcscan.com',
   // testnet: 'https://testnet.vitcscan.com',
   // thomiznet: 'https://thomiznet.vitcscan.com',
   // local: 'https://debug.vitcscan.com',
