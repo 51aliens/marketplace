@@ -7,3 +7,6 @@
 
 # Marketplace
 The marketplace is live at https://app.51aliens.net!
+
+# IPS Hash
+> 51 Aliens' IPFS hash is `QmdyiHMxs9VJxtdQAW4UnAfQ5KweuXjgtk4J65i1SmSd3F`
