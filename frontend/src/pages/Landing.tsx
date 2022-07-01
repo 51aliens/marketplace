@@ -228,7 +228,7 @@ const Page: FC<{}> = () => {
             params: [],
             methodName: 'safeMint',
             tokenId: VITE_TOKEN_ID,
-            amount: (BigInt(10) * BigInt(10) ** BigInt(18)).toString(), // 10 vite
+            amount: (BigInt(1200) * BigInt(10) ** BigInt(18)).toString(), // 10 vite
           },
     [baycContractAddress, walletAddress]
   );
