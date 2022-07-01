@@ -65,6 +65,7 @@ contract NFTMarketplace is ERC721Enumerable, Ownable, Withdrawable {
         free_nfts_count--;
 
         _mint(msg.sender, tokenId);
+        _increasePendingWithdrawal(Ownable.owner(), mintingFee);
     }
 
     function burn(uint256 tokenId) public {
