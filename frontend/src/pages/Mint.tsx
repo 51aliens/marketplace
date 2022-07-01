@@ -223,9 +223,9 @@ const Page = () => {
     'BASE_URL',
     baseUrlQueryParams
   );_*/
-  const getNftMetadata = `/aliens/${tokenId}.json`;
+  const getNftMetadata = `https://cdn.51aliens.net/${tokenId}.json`;
   const nftMetadata = useGetRequest<GetNftMetadata>(getNftMetadata);
-  const imgUrl = `/aliens/${tokenId}.png`;
+  const imgUrl = `https://cdn.51aliens.net/${tokenId}.png`;
 
   /*useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
     nftMetadata,
