@@ -6,10 +6,10 @@ import Button from '@mui/material/Button';
 import { useViteProvider, Network } from '@react-vite';
 
 const NETWORKS = [
-  // 'mainnet',
-  'testnet',
-  'thomiznet',
-  'local',
+  'mainnet',
+  // 'testnet',
+  // 'thomiznet',
+  // 'local',
 ];
 
 const NetworkSwitcher: FC = () => {

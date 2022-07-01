@@ -5,21 +5,21 @@ import { Network } from '../types';
 import { ViteProviderContext } from './vite';
 
 const VITE_BLOCK_EXPLORERS: Record<Network, string> = {
-  // mainnet: 'https://viteview.xyz/#',
-  testnet: 'https://testnet.vitcscan.com',
-  thomiznet: 'https://thomiznet.vitcscan.com',
-  local: 'https://debug.vitcscan.com',
+  mainnet: 'https://vitcscan.com/',
+  // testnet: 'https://testnet.vitcscan.com',
+  // thomiznet: 'https://thomiznet.vitcscan.com',
+  // local: 'https://debug.vitcscan.com',
 };
 
 const VITE_PROVIDER_URLS: Record<Network, string> = {
-  // mainnet: 'wss://node.vite.net/gvite/ws',
-  testnet: 'wss://buidl.vite.net/gvite/ws',
-  thomiznet: 'wss://node-vite-testnet.thomiz.dev/ws',
-  local: 'ws://127.0.0.1:23457',
+  mainnet: 'wss://node-vite.thomiz.dev/ws',
+  // testnet: 'wss://buidl.vite.net/gvite/ws',
+  // thomiznet: 'wss://node-vite-testnet.thomiz.dev/ws',
+  // local: 'ws://127.0.0.1:23457',
 };
 
 export const ViteProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [network, setNetwork] = useState<Network>('thomiznet');
+  const [network, setNetwork] = useState<Network>('mainnet');
 
   const baseBlockexplorerUrl = useMemo(() => VITE_BLOCK_EXPLORERS[network], [
     network,
