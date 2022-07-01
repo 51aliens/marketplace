@@ -14,7 +14,7 @@ contract NFTMarketplace is ERC721Enumerable, Ownable, Withdrawable {
     string public constant BASE_URL = "ipfs://QmdyiHMxs9VJxtdQAW4UnAfQ5KweuXjgtk4J65i1SmSd3F/";
 
     constructor() ERC721("51 Aliens", "51AL") {
-        feePortion = 100;
+        feePortion = 200; // A 2% fee is taken on every trade made through the marketplace. 
         emit TradingFeeChange(feePortion);
         emit MintingFeeChange(mintingFee);
     }
