@@ -29,6 +29,7 @@ import Address from '@components/shared/Address';
 import { OfferUpdatedEvent, BidUpdatedEvent, TradedEvent } from '../types';
 import { ZERO_ADDRESS, VITE_TOKEN_ID } from '../config';
 import useGetRequest from '@hooks/useGetRequest';
+import { vite } from '@react-vite/vite';
 
 const TABS = ['Details', 'Bids', 'History'];
 
@@ -80,8 +81,10 @@ const Page = () => {
   const { provider } = useViteProvider();
   const { walletAddress, connect, createAccountBlock } = useViteWallet();
   const [price, setPrice] = useState('0');
+  const [transferAddress, setTransferAddress] = useState('');
   const [activeTab, setActiveTab] = useState(TABS[0]);
   const [showTxModal, setShowTxModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
   const [logs, setLogs] = useState<Log[]>([]);
 
   const offerUpdatedEventsFilter = useCallback(
@@ -223,9 +226,9 @@ const Page = () => {
     'BASE_URL',
     baseUrlQueryParams
   );_*/
-  const getNftMetadata = `/aliens/${tokenId}.json`;
+  const getNftMetadata = `https://cdn.51aliens.net/${tokenId}.json`;
   const nftMetadata = useGetRequest<GetNftMetadata>(getNftMetadata);
-  const imgUrl = `/aliens/${tokenId}.png`;
+  const imgUrl = `https://cdn.51aliens.net/${tokenId}.png`;
 
   /*useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
     nftMetadata,
@@ -355,6 +358,22 @@ const Page = () => {
     createAccountBlock
   );
 
+  const transferParams = useMemo(
+    () => ({
+      address: walletAddress,
+      abi: MARKETPLACE_ABI as any,
+      toAddress: marketplaceContractAddress,
+      params: [walletAddress, transferAddress, tokenId],
+      methodName: 'transferFrom',
+    }),
+    [walletAddress, transferAddress, marketplaceContractAddress, tokenId]
+  );
+  const transferTx = useCreateAccountBlock(
+    'callContract',
+    transferParams,
+    createAccountBlock
+  );
+
   const bidParams = useMemo(
     () => ({
       address: walletAddress,
@@ -444,6 +463,12 @@ const Page = () => {
     }
   }, [bidTx, listTx]);
 
+  useEffect(() => {
+    if (transferTx.status === 'sent' || !ownerIsSelf) {
+      setShowTransferModal(false);
+    }
+  }, [transferTx, ownerIsSelf]);
+
   const onList = () => {
     isApprovedForAll ? listTx.send() : setApprovalForAllTx.send();
   };
@@ -468,6 +493,10 @@ const Page = () => {
 
   const onAcceptBid = () => {
     acceptBidTx.send();
+  };
+
+  const onTransfer = () => {
+    transferTx.send();
   };
 
   return !imgUrl ? null : (
@@ -600,7 +629,15 @@ const Page = () => {
                     ? 'Update listing price'
                     : 'List item'}
                 </Button>
-                {!(isApprovedForAll && hasOffer) ? null : (
+                {!(isApprovedForAll && hasOffer) ? (
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    onClick={() => setShowTransferModal(true)}
+                  >
+                    Transfer
+                  </Button>
+                ) : (
                   <Button variant='outlined' color='primary' onClick={onDelist}>
                     {delistTx.working || <>Delist</>}
                   </Button>
@@ -708,6 +745,58 @@ const Page = () => {
                   </Button>
                 )}
               </>
+            )}
+          </div>
+        </div>
+      </Dialog>
+      <Dialog
+        open={!!showTransferModal}
+        onClose={() => setShowTransferModal(false)}
+      >
+        <div className={'w-96 p-4'}>
+          <div className='flex flex-grow justify-space items-center my-2'>
+            <div className='flex text-xl mr-1'>Transfer</div>
+            <CloseIcon
+              className='cursor-pointer'
+              onClick={() => setShowTransferModal(false)}
+            />
+          </div>
+
+          <div>
+            <TextField
+              fullWidth
+              disabled={!walletAddress}
+              label={'Recipient'}
+              placeholder={'Enter destination address...'}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={transferAddress}
+              onChange={(e) =>
+                setTransferAddress((e.target.value as string).trim())
+              }
+              error={!vite.wallet.isValidAddress(transferAddress)}
+              helperText={
+                !vite.wallet.isValidAddress(transferAddress)
+                  ? 'Invalid address'
+                  : ''
+              }
+            />
+          </div>
+
+          <div className='mt-4'>
+            {!walletAddress ? (
+              <Button variant='outlined' onClick={connect}>
+                Connect
+              </Button>
+            ) : (
+              <Button
+                variant='outlined'
+                onClick={onTransfer}
+                disabled={!vite.wallet.isValidAddress(transferAddress)}
+              >
+                {transferTx.working || 'Transfer NFT'}
+              </Button>
             )}
           </div>
         </div>

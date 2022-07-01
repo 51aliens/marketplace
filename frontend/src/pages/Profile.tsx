@@ -268,7 +268,7 @@ const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
     [baseUrlParams, tokenId]
   );
   const nftMetadata = useIPFS<GetNftMetadata>(getNftMetadata);*/
-  const imgUrl = `/aliens/${tokenId}.png`;
+  const imgUrl = `https://cdn.51aliens.net/${tokenId}.png`;
   /*useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
     nftMetadata,
   ]);*/

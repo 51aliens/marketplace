@@ -514,13 +514,13 @@ const Mint: FC<{ tokenId: string }> = ({ tokenId }) => {
     callOffChainMethodParams
   );*/
 
-  //const getNftMetadata = `/aliens/${tokenId}.json`;
+  //const getNftMetadata = `https://cdn.51aliens.net/${tokenId}.json`;
   /*useMemo(
     () => (!baseUrlParams ? null : `${baseUrlParams[0]}${tokenId}`),
     [baseUrlParams, tokenId]
   );*/
   //const nftMetadata = useGetRequest<GetNftMetadata>(getNftMetadata)//useIPFS<GetNftMetadata>(getNftMetadata);
-  const imgUrl = `/aliens/${tokenId}.png`;
+  const imgUrl = `https://cdn.51aliens.net/${tokenId}.png`;
   /*useMemo(() => getIPFSKeyUrl(nftMetadata?.image ?? null), [
     nftMetadata,
   ]);*/
