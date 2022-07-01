@@ -190,8 +190,15 @@ const Page = () => {
     transferEventsFilter
   );
   const mints: string[] = useMemo(
-    () => uniq(transferEvents.map((e) => e.data.tokenId)),
-    [transferEvents]
+    () =>
+      transferEvents
+        .filter(
+          (log, i, arr) =>
+            arr.findIndex((e) => e.data.tokenId === log.data.tokenId) === i
+        )
+        .filter((e) => e.data.to === walletAddress)
+        .map((e) => e.data.tokenId),
+    [transferEvents, walletAddress]
   );
 
   return (
