@@ -46,7 +46,7 @@ export function useQueryContractState<T>(
         const filterParams = {
           addressHeightRange: {
             [contractAddress]: {
-              fromHeight: '0',
+              fromHeight: '1',
               toHeight: '0',
             },
           },
